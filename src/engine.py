@@ -49,9 +49,6 @@ async def create_task(payload, test_apps):
 
 
 def main(request=None):
-    results = []
-    msg = None
-    response = None
     if request is None:
         request = {"logger": "python"}
 

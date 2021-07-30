@@ -7,9 +7,29 @@ payloads:
       {
         "msg": "pong"
       }
-  # - url: RESURFACE_PLACEHOLDER/
-  #   type: GQL
-  #   method: POST
-  #   response_status: 200
-  #   request_body: |
-  #   response_body: |
+
+  - url: https://jsonplaceholder.typicode.com/posts/1/
+    type: REST
+    method: GET
+    response_status: 200
+    # request_body: |
+    response_body: |
+      {
+        "userId": 1,
+        "id": 1,
+        "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+        "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+      }
+
+  - url: https://jsonplaceholder.typicode.com/posts/2/
+    type: REST
+    method: GET
+    response_status: 200
+    # request_body: |
+    response_body: |
+      {
+        "userId": 1,
+        "id": 1,
+        "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+        "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+      }

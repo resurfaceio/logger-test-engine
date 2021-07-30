@@ -23,3 +23,16 @@ def run_gql_query(url, query, headers=None):
                 response.status_code, query
             )
         )
+
+
+def parse_args(request):
+
+    if isinstance(request, dict):
+        pass
+    elif request.headers["content-type"] == "application/json":
+        request = dict(request.get_json(silent=True))
+    elif request.headers["content-type"] == "application/octet-stream":
+        request = dict(json.loads(request.data))
+    else:
+        request = dict(json.loads(json.dumps(request)))
+    return request

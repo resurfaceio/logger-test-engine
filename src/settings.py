@@ -20,6 +20,5 @@ logger.add(
 
 IS_DEV = True
 LOCAL_URL = "http://localhost:8000"
-
 DB_HOST = "localhost"
 DB_PORT = 4000

@@ -1,35 +1,96 @@
 payloads:
-  - url: RESURFACE_PLACEHOLDER/ping/
-    type: REST
+  - url: RESURFACE_PLACEHOLDER/ping
+    type: REST # or GQL
     method: GET
     response_status: 200
+    descriptions: Test RESTful ping
     response_body: |
       {
         "msg": "pong"
       }
 
-  - url: https://jsonplaceholder.typicode.com/posts/1/
-    type: REST
-    method: GET
+  - url: RESURFACE_PLACEHOLDER/
+    type: GQL
+    method: POST
     response_status: 200
-    # request_body: |
+    descriptions: Graphql mutation to empty DB
+    request_body: |
+      mutation{
+        deleteEverything{
+          ok
+        }
+      }
     response_body: |
       {
-        "userId": 1,
-        "id": 1,
-        "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-        "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        "data": {
+          "deleteEverything": {
+            "ok": true
+          }
+        }
       }
 
-  - url: https://jsonplaceholder.typicode.com/posts/2/
-    type: REST
-    method: GET
+  - url: RESURFACE_PLACEHOLDER/
+    type: GQL
+    method: POST
     response_status: 200
-    # request_body: |
+    descriptions: Graphql query to get empty news
+    request_body: |
+      query{
+          allNews{
+            id
+          }
+        }
     response_body: |
       {
-        "userId": 1,
-        "id": 1,
-        "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
-        "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+        "data": {
+          "allNews": []
+        }
+      }
+
+  - url: RESURFACE_PLACEHOLDER/
+    type: GQL
+    method: POST
+    response_status: 200
+    descriptions: Graphql mutation to add data
+    request_body: |
+      mutation{
+          addNews(title: "This is a great short news!", body: "body here"){
+            news{
+              title
+              body
+            }
+          }
+        }
+    response_body: |
+      {
+        "data": {
+          "addNews": {
+            "news": {
+              "title": "This is a great short news!",
+              "body": "body here"
+            }
+          }
+        }
+      }
+
+  - url: RESURFACE_PLACEHOLDER/
+    type: GQL
+    method: POST
+    response_status: 200
+    descriptions: Graphql query to get news data
+    request_body: |
+      query{
+          allNews{
+            title
+          }
+        }
+    response_body: |
+      {
+        "data": {
+          "allNews": [
+            {
+              "title": "This is a great short news!"
+            }
+          ]
+        }
       }

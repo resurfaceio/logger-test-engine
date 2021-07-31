@@ -113,7 +113,7 @@ def test_with_db():
                         "success": all([req_body_ok, res_body_ok]),
                     }
                 )
-    except (ConnectionRefusedError, ConnectionAbortedError, ConnectionError) as e:
+    except Exception as e:
         logger.error("DB not found ignoring DB test")
         logger.debug(e)
     return results

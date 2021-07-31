@@ -1,15 +1,15 @@
-import asyncio
+# import asyncio
 import json
 from pprint import pformat
+import time
 
-import httpx
+import httpx as requests
 
-from .settings import BASEDIR, logger
-from .utils import parse_args, yaml_loader
-from . import ENGINE_ID
+from .settings import BASEDIR, logger, IS_DEV, LOCAL_URL
+from .utils import parse_args, yaml_loader, safe_json
+from . import ENGINE_ID, connect_db
+from .queries import fetch_data
 from werkzeug import Response
-
-# import trino
 
 
 payloads = yaml_loader(BASEDIR / "API.yaml")["payloads"]
@@ -17,21 +17,21 @@ loggers = yaml_loader(BASEDIR / "config.yaml")
 headers = {"Resurface-Engine-Id": ENGINE_ID}
 
 placeholder = "RESURFACE_PLACEHOLDER"
-# DB_CONN = trino.dbapi.connect(host="localhost", port=4000, user="admin")
 
 
-async def create_task(app):
+def create_task(app):
     msg = "Request completed succesfully!"
     task = None
     results = []
 
-    headers = {}
+    # headers = {}
 
-    async with httpx.AsyncClient() as requests:
-        tasks = []
-        for payload in payloads:
+    for i, payload in enumerate(payloads):
+        try:
             method_ = payload.get("method", "GET")
-            url_ = payload.get("url").replace(placeholder, app.get("url"))
+            url_ = payload.get("url").replace(
+                placeholder, LOCAL_URL if IS_DEV else app.get("url")
+            )
             logger.info(f"Running url '{url_}' for app '{app.get('name')}'")
             if payload.get("type", None) == "GQL":
                 task = requests.post(
@@ -44,32 +44,78 @@ async def create_task(app):
                     url_, data=payload.get("request_body"), headers=headers
                 )
 
-            tasks.append(task)
-
-        reqs = await asyncio.gather(*tasks, return_exceptions=True)
-        for i, req in enumerate(reqs):
-            if not isinstance(req, httpx.Response):
+            if task.status_code != payload.get("response_status"):
                 results.append(
                     {
                         "payload_number": i,
+                        "payload_descriptions": app.get("descriptions"),
                         "app": app.get("name"),
-                        "message": str(req),
+                        "message": str(task),
                         "success": False,
                     }
                 )
             else:
-
                 results.append(
                     {
                         "payload_number": i,
+                        "payload_descriptions": app.get("descriptions"),
                         "app": app.get("name"),
                         "message": str(msg),
                         "success": (
                             json.dumps(json.loads(payload.get("response_body")))
-                            == json.dumps(req.json())
+                            == json.dumps(task.json())
                         ),
                     }
                 )
+        except Exception as e:
+            results.append(
+                {
+                    "payload_number": i,
+                    "payload_descriptions": app.get("descriptions"),
+                    "app": app.get("name"),
+                    "message": str(e),
+                    "success": False,
+                }
+            )
+    return results
+
+
+def test_with_db():
+    results = []
+    try:
+        with connect_db as cnn:
+            curr = cnn.cursor()
+            curr.execute(fetch_data.format(id_=ENGINE_ID))
+            logger.info("DB found running test against DB")
+
+            rows = curr.fetchall()
+
+            for i, data in enumerate(rows):
+                d0 = None
+                try:  # Hack to get query from GQL
+                    d0 = safe_json(data[0])["query"]
+                except Exception:
+                    d0 = safe_json(data[0])
+
+                req_body_ok = d0 == payloads[i].get("request_body", None)
+                try:  # Hack to get str body
+                    res_body_ok = json.dumps(
+                        json.loads(safe_json(data[2]))
+                    ) == json.dumps(json.loads(payloads[i].get("response_body")))
+                except TypeError:
+                    res_body_ok = json.dumps(safe_json(data[2])) == json.dumps(
+                        json.loads(payloads[i].get("response_body"))
+                    )
+                results.append(
+                    {
+                        "payload_number": i,
+                        "message": "Testing against DB",
+                        "success": all([req_body_ok, res_body_ok]),
+                    }
+                )
+    except (ConnectionRefusedError, ConnectionAbortedError, ConnectionError) as e:
+        logger.error("DB not found ignoring DB test")
+        logger.debug(e)
     return results
 
 
@@ -83,17 +129,28 @@ def main(request=None):
     logger_ = request_params.get("logger")
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
     test_apps = loggers.get(str(logger_).lower())["apps"]
-    logger.info(f"There are {len(test_apps)} test apps for '{logger_}' logger")
+    logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")
 
     for app in test_apps:
 
-        cr_response = asyncio.run(create_task(app))
-        logger.info(f"Running test against Resurface DB for '{logger_}' logger")
-        all_good = all(x["success"] for x in cr_response)
+        task_response = create_task(app)
+        logger.info(f"Init test against Resurface DB for '{logger_}' logger")
+
+        # Had to wait to get data populated
+        # Find some robust solution
+        time.sleep(5)
+
+        db_response = test_with_db()
+
+        all_good = all(x["success"] for x in [*task_response, *db_response])
         all_all_good.append(all_good)
         if not all_good:
             logger.error("Some or all tests did not passed!")
-            logger.debug(pformat(cr_response))
+            logger.debug(pformat(task_response))
+            logger.debug(pformat(db_response))
+
+        logger.info("All tests passed with db and payloads!")
+
     return Response(
         json.dumps({"status": "success" if all(all_all_good) else "failure"}),
         200 if all(all_all_good) else 400,

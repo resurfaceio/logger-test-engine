@@ -2,6 +2,7 @@ import json
 import logging
 
 import yaml
+from ast import literal_eval
 
 
 def yaml_loader(yaml_path):
@@ -24,3 +25,20 @@ def parse_args(request):
     else:
         request = dict(json.loads(json.dumps(request)))
     return request
+
+
+def safe_json(data):
+
+    if isinstance(data, dict):
+        return data
+    elif isinstance(data, str):
+        try:
+            data = literal_eval(data)
+            if isinstance(data, list):
+                return {k: v for k, v in data}
+            return data
+        except ValueError:
+
+            return data
+    else:
+        return None

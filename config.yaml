@@ -1,3 +1,5 @@
+# These urls will be replaced in DEV mode
+
 go:
   apps:
     - name: musk-test-app
@@ -16,7 +18,7 @@ python:
       url: https://url-from-serverless # Serverless URL
     - name: aiohttp-test-app
       url: https://url-from-serverless # Serverless URL
-    - name: fastapi-test-app
-      url: https://url-from-serverless # Serverless URL
-    - name: tornado-test-app
-      url: https://url-from-serverless # Serverless URL
+    # - name: fastapi-test-app
+    #   url: https://url-from-serverless # Serverless URL
+    # - name: tornado-test-app
+    #   url: https://url-from-serverless # Serverless URL

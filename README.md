@@ -14,7 +14,7 @@ loggername:
 
 ## Development
 ### Setup
-- Get the resurface docker contaienr and relevant test apps.
+- Get the resurface docker container and relevant test apps.
 - Setup python virtual env
 - Install requirements
 - Edit `settings.py` file as  per your setup.

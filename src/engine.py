@@ -7,24 +7,24 @@ import httpx as requests
 
 from .settings import BASEDIR, logger, IS_DEV, LOCAL_URL
 from .utils import parse_args, yaml_loader, safe_json
-from . import ENGINE_ID, connect_db
+from . import generate_app_id, connect_db, ENGINE_ID
 from .queries import fetch_data
 from werkzeug import Response
 
 
 payloads = yaml_loader(BASEDIR / "API.yaml")["payloads"]
 loggers = yaml_loader(BASEDIR / "config.yaml")
-headers = {"Resurface-Engine-Id": ENGINE_ID}
+
 
 placeholder = "RESURFACE_PLACEHOLDER"
 
 
-def create_task(app):
+def create_task(app, app_id):
     msg = "Request completed succesfully!"
     task = None
     results = []
 
-    # headers = {}
+    headers = {"Resurface-Engine-Id": app_id}
 
     for i, payload in enumerate(payloads):
         try:
@@ -80,17 +80,18 @@ def create_task(app):
     return results
 
 
-def test_with_db():
+def test_with_db(app_id):
     results = []
     try:
         with connect_db as cnn:
             curr = cnn.cursor()
-            curr.execute(fetch_data.format(id_=ENGINE_ID))
+            curr.execute(fetch_data.format(id_=app_id))
             logger.info("DB found running test against DB")
-
+            time.sleep(2)
             rows = curr.fetchall()
 
             for i, data in enumerate(rows):
+
                 d0 = None
                 try:  # Hack to get query from GQL
                     d0 = safe_json(data[0])["query"]
@@ -114,7 +115,11 @@ def test_with_db():
                     }
                 )
     except Exception as e:
-        logger.error("DB not found ignoring DB test")
+        logger.error(
+            "There was some issue with DB test. \
+                Ignoring the DB test for now. See logs for more details."
+        )
+
         logger.debug(e)
     return results
 
@@ -132,24 +137,25 @@ def main(request=None):
     logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")
 
     for app in test_apps:
+        app_id = generate_app_id()
 
-        task_response = create_task(app)
+        task_response = create_task(app, app_id)
         logger.info(f"Init test against Resurface DB for '{logger_}' logger")
 
         # Had to wait to get data populated
         # Find some robust solution
         time.sleep(5)
 
-        db_response = test_with_db()
+        db_response = test_with_db(app_id)
 
         all_good = all(x["success"] for x in [*task_response, *db_response])
         all_all_good.append(all_good)
         if not all_good:
-            logger.error("Some or all tests did not passed!")
             logger.debug(pformat(task_response))
             logger.debug(pformat(db_response))
+            logger.error(f"Some or all tests did not passed or engine ID: {ENGINE_ID}")
 
-        logger.info("All tests passed with db and payloads!")
+        logger.info(f"All tests passed with db and payloads for engine ID: {ENGINE_ID}")
 
     return Response(
         json.dumps({"status": "success" if all(all_all_good) else "failure"}),

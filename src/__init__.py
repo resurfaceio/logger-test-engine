@@ -7,6 +7,10 @@ from .settings import DB_HOST, DB_PORT
 ENGINE_ID = str(uuid.uuid4().hex) + "_" + str(datetime.now().strftime("%s"))
 
 
+def generate_app_id():
+    return str(uuid.uuid4().hex) + "_" + str(datetime.now().strftime("%s"))
+
+
 connect_db = trino.dbapi.connect(host=DB_HOST, port=DB_PORT, user="admin")
 # class connect_db:
 #     def __enter__(self):

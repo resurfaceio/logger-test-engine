@@ -1,0 +1,5 @@
+.venv
+.git*
+Dockerfile
+.dockerignore
+src/__pychache__

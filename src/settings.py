@@ -7,7 +7,7 @@ BASEDIR = Path(__file__).resolve().parent.parent
 
 logger.remove()
 logger.add(
-    BASEDIR / "logs.log",
+    BASEDIR / "logs" / "logs.log",
     enqueue=True,
     backtrace=True,
 )

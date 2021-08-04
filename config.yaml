@@ -2,7 +2,7 @@
 
 go:
   apps:
-    - name: musk-test-app
+    - name: mux-test-app
       url: https://url-from-serverless # Serverless URL
 
 nodejs:
@@ -14,10 +14,10 @@ python:
   apps:
     - name: django-test-app
       url: https://url-from-serverless # Serverless URL
-    - name: flask-test-app
-      url: https://url-from-serverless # Serverless URL
-    - name: aiohttp-test-app
-      url: https://url-from-serverless # Serverless URL
+    #- name: flask-test-app
+    #  url: https://url-from-serverless # Serverless URL
+    #- name: aiohttp-test-app
+    #  url: https://url-from-serverless # Serverless URL
     # - name: fastapi-test-app
     #   url: https://url-from-serverless # Serverless URL
     # - name: tornado-test-app

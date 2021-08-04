@@ -1,10 +1,10 @@
 # import asyncio
 import json
-from pprint import pformat
 import time
-
+import sys
 import httpx as requests
 
+from pprint import pformat
 from .settings import BASEDIR, logger, IS_DEV, LOCAL_URL
 from .utils import parse_args, yaml_loader, safe_json
 from . import generate_app_id, connect_db, ENGINE_ID
@@ -35,13 +35,13 @@ def create_task(app, app_id):
             logger.info(f"Running url '{url_}' for app '{app.get('name')}'")
             if payload.get("type", None) == "GQL":
                 task = requests.post(
-                    url_, json={"query": payload.get("request_body")}, headers=headers
+                    url_, json={"query": payload.get("request_body")}, headers=headers, timeout=None
                 )
             elif str(method_).upper() == "GET":
-                task = requests.get(url_, headers=headers)
+                task = requests.get(url_, headers=headers, timeout=None)
             else:
                 task = requests.post(
-                    url_, data=payload.get("request_body"), headers=headers
+                    url_, data=payload.get("request_body"), headers=headers, timeout=None
                 )
 
             if task.status_code != payload.get("response_status"):
@@ -164,5 +164,7 @@ def main(request=None):
 
 
 if __name__ == "__main__":
-    res = main()
+    loggername = {"logger": sys.argv[1]} if len(sys.argv) > 1 else None
+    res = main(loggername)
     print(res)
+    sys.exit(0) if res.status_code == 200 else sys.exit(1)

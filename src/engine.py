@@ -35,13 +35,19 @@ def create_task(app, app_id):
             logger.info(f"Running url '{url_}' for app '{app.get('name')}'")
             if payload.get("type", None) == "GQL":
                 task = requests.post(
-                    url_, json={"query": payload.get("request_body")}, headers=headers, timeout=None
+                    url_,
+                    json={"query": payload.get("request_body")},
+                    headers=headers,
+                    timeout=None,
                 )
             elif str(method_).upper() == "GET":
                 task = requests.get(url_, headers=headers, timeout=None)
             else:
                 task = requests.post(
-                    url_, data=payload.get("request_body"), headers=headers, timeout=None
+                    url_,
+                    data=payload.get("request_body"),
+                    headers=headers,
+                    timeout=None,
                 )
 
             if task.status_code != payload.get("response_status"):
@@ -132,6 +138,8 @@ def main(request=None):
 
     request_params = parse_args(request)
     logger_ = request_params.get("logger")
+    if not logger_:
+        return Response(json.dumps({"status": "option"}))
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
     test_apps = loggers.get(str(logger_).lower())["apps"]
     logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")

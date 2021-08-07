@@ -124,7 +124,7 @@ def test_with_db(app_id):
                 results.append(
                     {
                         "payload_number": i,
-                        "message": "Testing against DB",
+                        "message": f"Testing {data} against DB",
                         "success": all([req_body_ok, res_body_ok]),
                     }
                 )
@@ -134,7 +134,7 @@ def test_with_db(app_id):
                 Ignoring the DB test for now. See logs for more details."
         )
 
-        logger.debug(e)
+        logger.error(e)
         results.append(
             {
                 "payload_number": None,
@@ -174,11 +174,11 @@ def main(request=None):
         all_good = all(x["success"] for x in [*task_response, *db_response])
         all_all_good.append(all_good)
         if not all_good:
-            logger.debug(pformat(task_response))
-            logger.debug(pformat(db_response))
             logger.error(
                 f"Some or all tests did not passed or engine ID: '{ENGINE_ID}'"
             )
+            logger.error(pformat(task_response))
+            logger.error(pformat(db_response))
 
         logger.info(
             f"All tests passed with db and payloads for engine ID: '{ENGINE_ID}'"

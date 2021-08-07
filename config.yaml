@@ -12,10 +12,10 @@ nodejs:
 
 python:
   apps:
-    # - name: django-test-app
-    #   url: https://resurface-django.herokuapp.com # Serverless URL
-    # - name: flask-test-app
-    #   url: https://resurface-flask.herokuapp.com # Serverless URL
+    - name: django-test-app
+      url: https://resurface-django.herokuapp.com # Serverless URL
+    - name: flask-test-app
+      url: https://resurface-flask.herokuapp.com # Serverless URL
     - name: aiohttp-test-app
       url: https://aiohttp-resurface.herokuapp.com # Serverless URL
     # - name: fastapi-test-app

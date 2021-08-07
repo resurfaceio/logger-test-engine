@@ -1,4 +1,4 @@
-# import asyncio
+import asyncio
 import json
 import time
 import sys
@@ -6,7 +6,7 @@ import httpx as requests
 
 from pprint import pformat
 from .settings import BASEDIR, logger, IS_DEV, LOCAL_URL
-from .utils import parse_args, yaml_loader, safe_json
+from .utils import parse_args, yaml_loader, safe_json, wake_apps
 from . import generate_app_id, connect_db, ENGINE_ID
 from .queries import fetch_data
 from werkzeug import Response
@@ -158,6 +158,10 @@ def main(request=None):
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
     test_apps = loggers.get(str(logger_).lower())["apps"]
     logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")
+
+    # Wake sleeping apps
+    logger.info("waking up sleeping apps")
+    asyncio.run(wake_apps([x.get("url") for x in test_apps]))
 
     for app in test_apps:
         app_id = generate_app_id()

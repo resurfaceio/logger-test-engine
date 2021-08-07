@@ -176,9 +176,13 @@ def main(request=None):
         if not all_good:
             logger.debug(pformat(task_response))
             logger.debug(pformat(db_response))
-            logger.error(f"Some or all tests did not passed or engine ID: {ENGINE_ID}")
+            logger.error(
+                f"Some or all tests did not passed or engine ID: '{ENGINE_ID}'"
+            )
 
-        logger.info(f"All tests passed with db and payloads for engine ID: {ENGINE_ID}")
+        logger.info(
+            f"All tests passed with db and payloads for engine ID: '{ENGINE_ID}'"
+        )
 
     return Response(
         json.dumps({"status": "success" if all(all_all_good) else "failure"}),

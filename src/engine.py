@@ -127,6 +127,13 @@ def test_with_db(app_id):
         )
 
         logger.debug(e)
+        results.append(
+            {
+                "payload_number": None,
+                "message": "Testing against DB",
+                "success": False,
+            }
+        )
     return results
 
 

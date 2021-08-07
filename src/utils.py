@@ -1,8 +1,10 @@
+import asyncio
 import json
 import logging
-
-import yaml
 from ast import literal_eval
+
+import httpx
+import yaml
 
 
 def yaml_loader(yaml_path):
@@ -42,3 +44,10 @@ def safe_json(data):
             return data
     else:
         return None
+
+
+async def wake_apps(urls):
+    async with httpx.AsyncClient() as client:
+        tasks = (client.get(url) for url in urls)
+        reqs = await asyncio.gather(*tasks)
+    return [req.text for req in reqs]

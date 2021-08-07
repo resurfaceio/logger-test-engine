@@ -1,7 +1,7 @@
 import os
 
 import flask
-from flask import request
+from flask import request, jsonify
 
 from src.engine import main
 
@@ -18,7 +18,7 @@ def make_test():
 
 @app.route("/ping", methods=["GET"])
 def index():
-    return "<h1>Engine working fine</h1>"
+    return jsonify({"res": "ENGINE is working fine"}), 200
 
 
 if __name__ == "__main__":

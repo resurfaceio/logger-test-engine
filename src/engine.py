@@ -95,6 +95,14 @@ def test_with_db(app_id):
             logger.info("DB found running test against DB")
             time.sleep(2)
             rows = curr.fetchall()
+            if not rows:
+                results.append(
+                    {
+                        "payload_number": None,
+                        "message": "Nothing was recorded in DB",
+                        "success": False,
+                    }
+                )
 
             for i, data in enumerate(rows):
 
@@ -130,7 +138,7 @@ def test_with_db(app_id):
         results.append(
             {
                 "payload_number": None,
-                "message": "Testing against DB",
+                "message": "Exception on test against DB",
                 "success": False,
             }
         )
@@ -146,7 +154,7 @@ def main(request=None):
     request_params = parse_args(request)
     logger_ = request_params.get("logger")
     if not logger_:
-        return Response(json.dumps({"status": "option"}))
+        return Response(json.dumps({"status": "option"}), 204)
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
     test_apps = loggers.get(str(logger_).lower())["apps"]
     logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")

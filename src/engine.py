@@ -24,7 +24,7 @@ def create_task(app, app_id):
     task = None
     results = []
 
-    headers = {"Resurface-Engine-Id": app_id}
+    headers = {"Resurface-App-Id": app_id}
 
     for i, payload in enumerate(payloads):
         try:
@@ -166,6 +166,8 @@ def main(request=None):
         except Exception:
             pass
 
+    all_all_good = []
+
     for app in test_apps:
         app_id = generate_app_id()
 
@@ -193,10 +195,11 @@ def main(request=None):
             logger.info(
                 f"All tests passed with db and payloads for engine ID: '{ENGINE_ID}'"
             )
+        all_all_good.append(all_good)
 
     return Response(
-        json.dumps({"status": "success" if all_good else "failure"}),
-        200 if all_good else 400,
+        json.dumps({"status": "success" if all(all_all_good) else "failure"}),
+        200 if all(all_all_good) else 400,
     )
 
 

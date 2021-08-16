@@ -95,6 +95,7 @@ def test_with_db(app_id):
             logger.info("DB found running test against DB")
             time.sleep(2)
             rows = curr.fetchall()
+
             if not rows:
                 results.append(
                     {
@@ -149,8 +150,6 @@ def main(request=None):
     if request is None:
         request = {"logger": "python"}
 
-    all_all_good = []
-
     request_params = parse_args(request)
     logger_ = request_params.get("logger")
     if not logger_:
@@ -160,8 +159,9 @@ def main(request=None):
     logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")
 
     # Wake sleeping apps
-    logger.info("waking up sleeping apps")
-    asyncio.run(wake_apps([x.get("url") for x in test_apps]))
+    if not IS_DEV:
+        logger.info("waking up sleeping apps")
+        asyncio.run(wake_apps([x.get("url") for x in test_apps]))
 
     for app in test_apps:
         app_id = generate_app_id()
@@ -176,21 +176,21 @@ def main(request=None):
         db_response = test_with_db(app_id)
 
         all_good = all(x["success"] for x in [*task_response, *db_response])
-        all_all_good.append(all_good)
+
         if not all_good:
             logger.error(
                 f"Some or all tests did not passed or engine ID: '{ENGINE_ID}'"
             )
             logger.error(pformat(task_response))
             logger.error(pformat(db_response))
-
-        logger.info(
-            f"All tests passed with db and payloads for engine ID: '{ENGINE_ID}'"
-        )
+        else:
+            logger.info(
+                f"All tests passed with db and payloads for engine ID: '{ENGINE_ID}'"
+            )
 
     return Response(
-        json.dumps({"status": "success" if all(all_all_good) else "failure"}),
-        200 if all(all_all_good) else 400,
+        json.dumps({"status": "success" if all_good else "failure"}),
+        200 if all_good else 400,
     )
 
 

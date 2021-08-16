@@ -2,7 +2,7 @@ import asyncio
 import json
 import time
 import sys
-import httpx as requests
+import httpx
 
 from pprint import pformat
 from .settings import BASEDIR, logger, IS_DEV, LOCAL_URL
@@ -34,16 +34,16 @@ def create_task(app, app_id):
             )
             logger.info(f"Running url '{url_}' for app '{app.get('name')}'")
             if payload.get("type", None) == "GQL":
-                task = requests.post(
+                task = httpx.post(
                     url_,
                     json={"query": payload.get("request_body")},
                     headers=headers,
                     timeout=None,
                 )
             elif str(method_).upper() == "GET":
-                task = requests.get(url_, headers=headers, timeout=None)
+                task = httpx.get(url_, headers=headers, timeout=None)
             else:
-                task = requests.post(
+                task = httpx.post(
                     url_,
                     data=payload.get("request_body"),
                     headers=headers,
@@ -166,7 +166,10 @@ def main(request=None):
     for app in test_apps:
         app_id = generate_app_id()
 
-        task_response = create_task(app, app_id)
+        try:
+            task_response = create_task(app, app_id)
+        except Exception as e:
+            task_response = [{"success": False, "message": e}]
         logger.info(f"Init test against Resurface DB for '{logger_}' logger")
 
         # Had to wait to get data populated

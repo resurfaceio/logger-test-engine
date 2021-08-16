@@ -161,15 +161,18 @@ def main(request=None):
     # Wake sleeping apps
     if not IS_DEV:
         logger.info("waking up sleeping apps")
-        asyncio.run(wake_apps([x.get("url") for x in test_apps]))
+        try:
+            asyncio.run(wake_apps([x.get("url") for x in test_apps]))
+        except Exception:
+            pass
 
     for app in test_apps:
         app_id = generate_app_id()
 
         try:
             task_response = create_task(app, app_id)
-        except Exception as e:
-            task_response = [{"success": False, "message": e}]
+        except Exception:
+            task_response = [{"success": False}]
         logger.info(f"Init test against Resurface DB for '{logger_}' logger")
 
         # Had to wait to get data populated

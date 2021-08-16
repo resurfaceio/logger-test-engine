@@ -48,6 +48,6 @@ def safe_json(data):
 
 async def wake_apps(urls):
     async with httpx.AsyncClient() as client:
-        tasks = (client.get(url) for url in urls)
+        tasks = (client.get(url, timeout=None) for url in urls)
         reqs = await asyncio.gather(*tasks)
     return [req.text for req in reqs]

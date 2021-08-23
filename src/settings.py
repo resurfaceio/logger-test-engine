@@ -18,7 +18,7 @@ logger.add(
     level="INFO",
 )
 
-IS_DEV = False
+IS_DEV = True
 LOCAL_URL = "http://localhost"
-DB_HOST = "resurfacedb.eastus.azurecontainer.io"
+DB_HOST = "localhost"
 DB_PORT = 4000

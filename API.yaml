@@ -1,5 +1,6 @@
 payloads:
   - url: RESURFACE_PLACEHOLDER/ping
+    payload_number: 0
     type: REST # or GQL
     method: GET
     response_status: 200
@@ -10,6 +11,7 @@ payloads:
       }
 
   - url: RESURFACE_PLACEHOLDER/
+    payload_number: 1
     type: GQL
     method: POST
     response_status: 200
@@ -30,6 +32,7 @@ payloads:
       }
 
   - url: RESURFACE_PLACEHOLDER/
+    payload_number: 2
     type: GQL
     method: POST
     response_status: 200
@@ -48,6 +51,7 @@ payloads:
       }
 
   - url: RESURFACE_PLACEHOLDER/
+    payload_number: 3
     type: GQL
     method: POST
     response_status: 200
@@ -74,6 +78,7 @@ payloads:
       }
 
   - url: RESURFACE_PLACEHOLDER/
+    payload_number: 4
     type: GQL
     method: POST
     response_status: 200

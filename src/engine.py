@@ -154,7 +154,7 @@ def _extracted_from_test_with_db_5(cnn, app_id, results):
         )
 
 
-def main(request=None):
+def main(request=None, app_name=None):
     if request is None:
         request = {"logger": "python"}
 
@@ -167,7 +167,11 @@ def main(request=None):
     if not logger_:
         return Response(json.dumps({"status": "option"}), 204)
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
-    test_apps = loggers.get(str(logger_).lower())["apps"]
+    if app_name is None:
+        test_apps = loggers.get(str(logger_).lower())["apps"]
+    else:
+        test_apps = [app_name]
+
     logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")
 
     # Wake sleeping apps

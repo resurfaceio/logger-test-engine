@@ -1,7 +1,8 @@
-from pathlib import Path
-from loguru import logger
+import os
 import sys
+from pathlib import Path
 
+from loguru import logger
 
 BASEDIR = Path(__file__).resolve().parent.parent
 CONFIG_DIR = BASEDIR / "src/config"
@@ -20,5 +21,6 @@ logger.add(
 
 IS_DEV = True
 LOCAL_URL = "http://localhost"
-DB_HOST = "localhost"
+
+DB_HOST = os.environ.get("USAGE_LOGGERS_URL", "localhost")
 DB_PORT = 4000

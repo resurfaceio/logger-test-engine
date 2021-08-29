@@ -13,9 +13,6 @@ from .queries import fetch_data
 from .settings import CONFIG_DIR, IS_DEV, LOCAL_URL, logger
 from .utils import parse_args, safe_json, wake_apps, yaml_loader
 
-# from typing import Optional
-
-
 payloads = yaml_loader(CONFIG_DIR / "API.yaml")["payloads"]
 loggers = yaml_loader(CONFIG_DIR / "config.yaml")
 
@@ -155,6 +152,7 @@ def _extracted_from_test_with_db_5(cnn, app_id, results):
 
 
 def main(request=None, app_name=None):
+
     if request is None:
         request = {"logger": "python"}
 

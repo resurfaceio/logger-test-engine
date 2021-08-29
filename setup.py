@@ -17,7 +17,7 @@ setup(
     entry_points={
         "console_scripts": ["test-resurface=src.engine:cli"],
     },
-    package_data={"": ["config.yaml", "README.md"]},
+    package_data={"": ["config.yaml", "README.md", "API.yaml"]},
     include_package_data=True,
     zip_safe=False,
 )

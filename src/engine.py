@@ -1,16 +1,18 @@
 import asyncio
 import json
-import time
 import sys
-import httpx
-
+import time
 from pprint import pformat
-from .settings import BASEDIR, logger, IS_DEV, LOCAL_URL
-from .utils import parse_args, yaml_loader, safe_json, wake_apps
-from . import generate_app_id, connect_db, ENGINE_ID
-from .queries import fetch_data
+from typing import Optional
+
+import argh
+import httpx
 from werkzeug import Response
 
+from . import ENGINE_ID, connect_db, generate_app_id
+from .queries import fetch_data
+from .settings import BASEDIR, IS_DEV, LOCAL_URL, logger
+from .utils import parse_args, safe_json, wake_apps, yaml_loader
 
 payloads = yaml_loader(BASEDIR / "API.yaml")["payloads"]
 loggers = yaml_loader(BASEDIR / "config.yaml")
@@ -150,8 +152,12 @@ def main(request=None):
     if request is None:
         request = {"logger": "python"}
 
-    request_params = parse_args(request)
-    logger_ = request_params.get("logger")
+    if isinstance(request, str):
+        logger_ = request
+    else:
+        request_params = parse_args(request)
+        logger_ = request_params.get("logger")
+
     if not logger_:
         return Response(json.dumps({"status": "option"}), 204)
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
@@ -201,6 +207,43 @@ def main(request=None):
         json.dumps({"status": "success" if all(all_all_good) else "failure"}),
         200 if all(all_all_good) else 400,
     )
+
+
+def cli():
+    print(
+        """
+.  . .  .  . .  .  . .  .  . .  .  . .  .  . .  
+.       .       .       .       .       .     .
+    .  .    .  .    .  .   . . .    .  .    .    
+.       .       .       . @8: .  .      .     .  
+.  .    .  .    .  .  . t8 @ 8 .   .    .  .  .
+.    .  .    .  .    .  . %8X@X8:..   .   .     
+.       .       .     . :88@XS@8;.    .    .  
+.   . .    .  .    .  .  ..8X8@@@X8  .     .   .
+.     .    .  .         :88X88@@ S..   .   .  
+.    .   .       .  .  .. t88 : 88888 .         
+    .   .   .  .    .         : %8@8X8  . .  . . 
+.    .      .   .    .   .   . 8%@@XS  .        
+.    . .. .. . . .  . .  ..88S@8@8@S .  .  .  
+.   . .:X8@8    888@XS S 8S8@@@@8XSSX8 .   .   .
+.   88 8888    88XSXX@XSX@@@8@8@8@8  . .      
+.  . %@88@@@8 888@8@@@@@@@@@8@888888 ;.     .   
+    . %8  8:8S88 888X@@8@@8@@@88 888@; .  .    . 
+.   . @ tSS  ;88@  8S8@@@@@888 ;88@8..     .    
+.   X88t888t :8@88@@@@8@88@888888;.  . .   .  
+.   .   888:88888:S8888S@@88XS888 :.       .    
+        .; 8@X t8@888%8888@@@8@XX@88S . .      . 
+.  .        8888S  ;8X8S8@8@XX@@@@8@;:   . .    
+.     .   :t XX8888888@@88        . ..      .  
+    .         :%%%  t8@@XtXX@    :.   . . .     
+.  .  .          ..    88888X;    ..    .    .   
+            .       :          .. .     .   . 
+.  .  .          .   .            .   . .       
+    █▀█ █▀▀ █▀ █░█ █▀█ █▀▀ ▄▀█ █▀▀ █▀▀
+    █▀▄ ██▄ ▄█ █▄█ █▀▄ █▀░ █▀█ █▄▄ ██▄
+"""
+    )
+    argh.dispatch_command(main)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@ import json
 import sys
 import time
 from pprint import pformat
-from typing import Optional
 
 import argh
 import httpx
@@ -11,11 +10,14 @@ from werkzeug import Response
 
 from . import ENGINE_ID, connect_db, generate_app_id
 from .queries import fetch_data
-from .settings import BASEDIR, IS_DEV, LOCAL_URL, logger
+from .settings import CONFIG_DIR, IS_DEV, LOCAL_URL, logger
 from .utils import parse_args, safe_json, wake_apps, yaml_loader
 
-payloads = yaml_loader(BASEDIR / "API.yaml")["payloads"]
-loggers = yaml_loader(BASEDIR / "config.yaml")
+# from typing import Optional
+
+
+payloads = yaml_loader(CONFIG_DIR / "API.yaml")["payloads"]
+loggers = yaml_loader(CONFIG_DIR / "config.yaml")
 
 
 placeholder = "RESURFACE_PLACEHOLDER"
@@ -92,49 +94,10 @@ def test_with_db(app_id):
     results = []
     try:
         with connect_db as cnn:
-            curr = cnn.cursor()
-            curr.execute(fetch_data.format(id_=app_id))
-            logger.info("DB found running test against DB")
-            time.sleep(2)
-            rows = curr.fetchall()
-
-            if not rows:
-                results.append(
-                    {
-                        "payload_number": None,
-                        "message": "Nothing was recorded in DB",
-                        "success": False,
-                    }
-                )
-
-            for i, data in enumerate(rows):
-
-                d0 = None
-                try:  # Hack to get query from GQL
-                    d0 = safe_json(data[0])["query"]
-                except Exception:
-                    d0 = safe_json(data[0])
-
-                req_body_ok = d0 == payloads[i].get("request_body", None)
-                try:  # Hack to get str body
-                    res_body_ok = json.dumps(
-                        json.loads(safe_json(data[2]))
-                    ) == json.dumps(json.loads(payloads[i].get("response_body")))
-                except TypeError:
-                    res_body_ok = json.dumps(safe_json(data[2])) == json.dumps(
-                        json.loads(payloads[i].get("response_body"))
-                    )
-                results.append(
-                    {
-                        "payload_number": i,
-                        "message": f"Testing {data} against DB",
-                        "success": all([req_body_ok, res_body_ok]),
-                    }
-                )
+            _extracted_from_test_with_db_5(cnn, app_id, results)
     except Exception as e:
         logger.error(
-            "There was some issue with DB test. \
-                Ignoring the DB test for now. See logs for more details."
+            "There was some issue with DB test. Ignoring the DB test for now. See logs for more details."
         )
 
         logger.error(e)
@@ -145,7 +108,50 @@ def test_with_db(app_id):
                 "success": False,
             }
         )
+
     return results
+
+
+def _extracted_from_test_with_db_5(cnn, app_id, results):
+    curr = cnn.cursor()
+    curr.execute(fetch_data.format(id_=app_id))
+    logger.info("DB found running test against DB")
+    time.sleep(2)
+    rows = curr.fetchall()
+
+    if not rows:
+        results.append(
+            {
+                "payload_number": None,
+                "message": "Nothing was recorded in DB",
+                "success": False,
+            }
+        )
+
+    for i, data in enumerate(rows):
+
+        d0 = None
+        try:  # Hack to get query from GQL
+            d0 = safe_json(data[0])["query"]
+        except Exception:
+            d0 = safe_json(data[0])
+
+        req_body_ok = d0 == payloads[i].get("request_body", None)
+        try:  # Hack to get str body
+            res_body_ok = json.dumps(json.loads(safe_json(data[2]))) == json.dumps(
+                json.loads(payloads[i].get("response_body"))
+            )
+        except TypeError:
+            res_body_ok = json.dumps(safe_json(data[2])) == json.dumps(
+                json.loads(payloads[i].get("response_body"))
+            )
+        results.append(
+            {
+                "payload_number": i,
+                "message": f"Testing {data} against DB",
+                "success": all([req_body_ok, res_body_ok]),
+            }
+        )
 
 
 def main(request=None):

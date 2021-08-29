@@ -165,10 +165,12 @@ def main(request=None, app_name=None):
     if not logger_:
         return Response(json.dumps({"status": "option"}), 204)
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
-    if app_name is None:
-        test_apps = loggers.get(str(logger_).lower())["apps"]
-    else:
-        test_apps = [app_name]
+    test_apps = loggers.get(str(logger_).lower())["apps"]
+    if app_name is not None:
+        for x in test_apps:
+            if x.get("name") == app_name:
+                test_apps = [x]
+                break
 
     logger.info(f"There are/is {len(test_apps)} test app(s) for '{logger_}' logger")
 

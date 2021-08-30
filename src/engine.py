@@ -152,6 +152,7 @@ def _extracted_from_test_with_db_5(cnn, app_id, results):
 
 
 def main(request=None, app_name=None):
+    request_params = {}
 
     if request is None:
         request = {"logger": "python"}
@@ -166,9 +167,11 @@ def main(request=None, app_name=None):
         return Response(json.dumps({"status": "option"}), 204)
     logger.info(f"Running test for '{logger_}' logger with engine ID: '{ENGINE_ID}'")
     test_apps = loggers.get(str(logger_).lower())["apps"]
-    if app_name is not None:
+    test_app_items = [app_name, request_params.get("app_name", None)]
+    if any(test_app_items):
+        next_app = next(item for item in test_app_items if item is not None)
         for x in test_apps:
-            if x.get("name") == app_name:
+            if x.get("name") == next_app:
                 test_apps = [x]
                 break
 

@@ -1,7 +1,7 @@
 # logger-test-engine
 
 ## Configurations
-- `config.yaml`: This file contains the configurations for logger and it's test apps.
+- `src/config/config.yaml`: This file contains the configurations for logger and it's test apps.
 ```yaml
 loggername:
     apps:
@@ -10,7 +10,7 @@ loggername:
 
 ```
 
-- `API.yaml`: This file contains the scripts to run in the test apps. Do not change this.
+- `src/config/API.yaml`: This file contains the scripts to run in the test apps. Do not change this.
 
 ## Development
 ### Setup

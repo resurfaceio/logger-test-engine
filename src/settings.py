@@ -22,4 +22,4 @@ logger.add(
 IS_DEV = os.environ.get("IS_DEV", False)
 LOCAL_URL = os.environ.get("LOGGERS_URL", "http://localhost")
 DB_HOST = os.environ.get("USAGE_LOGGERS_HOST", "localhost")
-DB_PORT = 4000
+DB_PORT = 7700
